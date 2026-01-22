@@ -87,6 +87,7 @@ class Game:
         self.game_over = False
         self.logs = []
         self.removed_card = None 
+        self.last_action = None # { 'player_name': str, 'card_value': int, 'target_name': str, 'description': str }
         self.lock = threading.Lock()
         self.last_activity = time.time()
         self.round_end_time = None
@@ -217,6 +218,7 @@ class Game:
         self.log(f"Rozpoczęto nową rundę. Tura: {self.players[self.turn_index].name}")
         self.game_over = False
         self.round_end_time = None
+        self.last_action = None
 
     def next_turn(self):
         if self.check_round_end():
@@ -272,6 +274,15 @@ class Game:
             effect_msg = self.execute_effect(player, played_card, target, guess_value)
             if effect_msg:
                 self.log(effect_msg)
+            
+            # Record last action for UI
+            self.last_action = {
+                'player_name': player.name,
+                'card_value': played_card.value,
+                'card_name': played_card.name,
+                'target_name': target.name if target else None,
+                'description': effect_msg if effect_msg else f"{player.name} zagrywa kartę bez efektu."
+            }
 
             if not self.check_round_end():
                  self.next_turn()
